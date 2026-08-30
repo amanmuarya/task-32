@@ -1,93 +1,163 @@
 # React.js Mini Project: Offline Chess Game
 
 ## Here's how I'd approach planning any chess game (or similar rule-heavy simulation) from scratch.
-
 # 1. Separate "the rules" from "the picture"
+# Chess Game — React
 
-Before touching UI, decide that chess logic lives in pure functions that know nothing about React, pixels, or clicks. They just take a board + a move and return a new board or a yes/no. This separation is the single most important decision — it means you can test the hard part (rules) without a browser, and swap the UI later without touching logic.
+This is a two-player chess game made using React. I built the chess board, piece movement, game rules, and other features without using a chess library or chess engine.
 
-# 2. Pick your data model first
+The main purpose of this project was to understand how chess rules can be implemented using JavaScript and React state.
 
-Everything else depends on this. Ask:
+## Main Features
 
-How do I represent the board? (8x8 array is simplest — board[row][col])
-How do I represent a square? (row/col numbers vs. algebraic string "e4" — pick one as canonical, convert at the edges)
-How do I represent a piece? ({type, color} object is usually enough)
-What "state" exists beyond the board itself? Whose turn it is, castling rights, en passant target square — these aren't captured by the board alone, so they need their own variables.
+* 8x8 chess board with the normal starting position
+* Two-player gameplay: White and Black
+* Legal movement for all chess pieces
+* Turn changes after every valid move
+* Check, checkmate, and stalemate detection
+* Castling on both sides
+* En passant
+* Pawn promotion
+* Legal move highlighting
+* Captured pieces display
+* Move history
+* Chess notation such as `e4`, `Nf3`, and `O-O`
+* Undo last move
+* Timer for both players
+* New Game option
+* Different time controls
+* Message shown when an invalid move or wrong turn is selected
 
-Getting this right early avoids painful rewrites later.
+## How the Game Works
 
-# 3. Build in layers of increasing difficulty
+The board is represented using rows and columns. Each square can either contain a chess piece or be empty.
 
-Don't try to write "checkmate detection" on day one. Order matters:
+Each chess piece has two main properties:
 
-Render a static board with pieces in starting position — no interaction yet.
-Pseudo-legal moves per piece — "where can this piece physically move," ignoring check entirely (pawns, knights, sliding pieces, king).
-Click-to-move using only pseudo-legal moves — get the interaction loop working even if it's not fully correct yet.
-Special cases last — castling, en passant, promotion. These are edge cases on top of a working core, not part of the core itself.
+* Type — pawn, rook, knight, bishop, queen, or king
+* Color — white or black
 
-# 4. Think in "what could go wrong" checklists
-For a rules-heavy domain, brainstorm edge cases before coding:
+When a player clicks a piece, the game first checks whether that piece belongs to the current player. After that, the possible moves for the piece are calculated.
 
-Can a pinned piece still "capture the pinner"? (No, if it exposes the king — the generic simulate-and-check approach handles this automatically)
-What happens if a rook that could castle gets captured on its home square, not moved?
-Does en passant only work immediately after the double-step, not later?
-Two identical pieces can move to the same square — does your notation disambiguate correctly?
+For example:
 
-Writing these down before coding turns "debugging surprises" into "features you built on purpose."
+* A rook can move horizontally and vertically.
+* A bishop can move diagonally.
+* A knight moves in an L shape.
+* A queen can move like a rook or bishop.
+* A king moves one square at a time.
+* A pawn moves forward and captures diagonally.
 
-# 5. Test the logic in isolation
+After calculating the possible moves, the game also checks whether moving the piece would leave its own king in check. If that happens, the move is not allowed.
 
-Since the engine is pure functions, you can test it with plain scripts — no UI needed. Good test cases to hand-verify:
+## Check and Checkmate
 
-A known short forced checkmate (Fool's Mate, Scholar's Mate) — cheap way to validate your whole pipeline (move gen → check → checkmate) in one shot.
-A manually constructed pin — one piece should have zero legal moves.
-A manually constructed en passant / promotion position.
+After each move, the game checks the position of the king.
 
-# 6. Only then layer on UI state
+If the king is attacked, the game shows a check message and highlights the king's square.
 
-Once the engine is trustworthy, UI state is "just bookkeeping": which square is selected, which moves to highlight, timers, move history, undo stack. None of it needs new chess thinking — it's wiring the engine's outputs to what's on screen.
+If the player is in check and has no legal move left, the game declares checkmate.
 
-# 7. Undo/history as a side effect of good state design
+The game also checks for stalemate when the player has no legal moves but the king is not in check.
 
-If your engine functions are pure (oldBoard → newBoard, no mutation), undo becomes trivial: snapshot the full state before every move and push it onto a stack. You don't need a special "undo algorithm" — you get it for free from the way you structured step 1.
+## Special Chess Moves
 
-# The Study — Offline Chess (React)
-A fully offline, two-player chess game built from scratch in React — no chess libraries, no engine. All move generation, check/checkmate detection, and notation are hand-implemented.
+The game supports some of the special rules of chess.
 
-## Features
+### Castling
 
-- **8x8 board** with standard starting position
-- **Full legal move enforcement** for every piece (pawns, knights, bishops, rooks, queens, kings), including pins — a piece can't move if it would expose its own king to check
-- **Check / checkmate / stalemate detection**, with the king's square highlighted when in check and a status banner announcing the result
-- **Special moves**: castling (kingside & queenside, with all safety checks), en passant, and pawn promotion (with a piece-choice popup)
-- **Turn-based play** — illegal or out-of-turn clicks show a brief inline message instead of failing silently
-- **Countdown timers** for both players (3/5/10/15/30 min options), with the inactive player's clock paused automatically
-- **Move list in standard algebraic notation** (e.g. `e4`, `Nf3`, `O-O`, `Qxh4#`), including disambiguation (`Nbd7`) when needed
-- **Undo** — reverts the board, clocks, and move list to the previous state
-- **Legal-move highlighting** for the selected piece (dots for empty squares, rings for captures)
-- **Captured pieces tray** for each side
+Castling is allowed only when the required conditions are satisfied. The king and rook must have the correct movement history, the squares between them must be empty, and the king cannot castle through check.
 
-## Project structure
+### En Passant
 
+The game keeps track of the previous pawn move so that an en passant capture can only be made at the correct time.
+
+### Pawn Promotion
+
+When a pawn reaches the opposite end of the board, a small selection appears. The player can promote the pawn to a:
+
+* Queen
+* Rook
+* Bishop
+* Knight
+
+
+If a player's time reaches zero, the game ends by timeout.
+
+## Move History
+
+The game keeps a list of moves made during the current game.
+
+Some examples of the notation are:
+
+```text
+e4
+Nf3
+O-O
+Qxh4#
 ```
-ChessGame.jsx   # Single self-contained component — engine + UI + styles
+
+The notation also handles cases where two pieces of the same type can move to the same square.
+
+## Undo
+
+The Undo button takes the game back to the previous position.
+
+It restores the important game information, including:
+
+* Board position
+* Player turn
+* Move history
+* Timers
+* Special-move information
+
+## How to Play
+
+1. Select a time control.
+2. Click one of your pieces.
+3. The legal moves will be highlighted.
+4. Click a highlighted square to move.
+5. Continue taking turns with the other player.
+6. If a pawn reaches the final row, choose a promotion piece.
+7. Use **Undo Last Move** if you want to go back one move.
+8. Use **New Game** to start a new game.
+
+## Project Structure
+
+The main chess implementation is contained in:
+
+```text
+ChessGame.jsx
 ```
-## How to play
 
-1. Pick a time control (before the first move — it locks in once the game starts).
-2. Click a piece belonging to the player whose turn it is. Its legal moves light up on the board.
-3. Click a highlighted square to move there. Click another one of your own pieces to change your selection.
-4. If a pawn reaches the last rank, a popup lets you choose what to promote it to.
-5. The game announces check, checkmate, stalemate, or a timeout automatically.
-6. Use **Undo Last Move** to take back a move, or **New Game** to start over.
+This file contains the board, chess logic, React state, game controls, and UI for the game.
 
-## Notes / possible extensions
+## Limitations
 
-- Promotion currently opens a picker (Queen/Rook/Bishop/Knight) rather than auto-promoting to a queen.
-- Draw conditions implemented: stalemate and timeout. Threefold repetition and the fifty-move rule are not implemented.
-- The board doesn't flip between turns — White is always shown at the bottom.
-- Because everything is client-side and in-memory, refreshing the page resets the game (no persistence/save is built in).
+There are a few things that are not included in the current version:
 
+* Threefold repetition is not implemented.
+* The fifty-move rule is not implemented.
+* The board always has White at the bottom.
+* The game does not save its state after refreshing the browser.
+* The game works locally in the browser and does not use an online multiplayer server.
+
+## Running the Project
+
+Install the required packages and run the React project using the normal npm command.
+
+For a Vite project:
+
+```bash
+npm install
+npm run dev
+```
+
+For a project using a `start` script:
+
+```bash
+npm start
+```
+The exact command depends on the scripts defined in `package.json`.
 
 # Run your app as usual (`npm start` / `npm run dev`).
