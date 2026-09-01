@@ -1,163 +1,227 @@
 # React.js Mini Project: Offline Chess Game
 
-## Here's how I'd approach planning any chess game (or similar rule-heavy simulation) from scratch.
-# 1. Separate "the rules" from "the picture"
 # Chess Game — React
 
-This is a two-player chess game made using React. I built the chess board, piece movement, game rules, and other features without using a chess library or chess engine.
+This is a two-player chess game built using React and JavaScript. I developed the chess board, piece movement, game rules, special moves, and game controls without using any external chess library or chess engine.
 
-The main purpose of this project was to understand how chess rules can be implemented using JavaScript and React state.
+The main goal of this project was to understand how complex game rules can be implemented using JavaScript logic and React state management.
 
-## Main Features
+## Approach I Used
 
-* 8x8 chess board with the normal starting position
-* Two-player gameplay: White and Black
-* Legal movement for all chess pieces
-* Turn changes after every valid move
-* Check, checkmate, and stalemate detection
-* Castling on both sides
-* En passant
-* Pawn promotion
-* Legal move highlighting
-* Captured pieces display
-* Move history
-* Chess notation such as `e4`, `Nf3`, and `O-O`
-* Undo last move
-* Timer for both players
-* New Game option
-* Different time controls
-* Message shown when an invalid move or wrong turn is selected
+I developed the game step by step instead of implementing all chess rules at once.
 
-## How the Game Works
+### 1. Created the Chess Board
 
-The board is represented using rows and columns. Each square can either contain a chess piece or be empty.
+First, I created an 8×8 chess board using React. Each square stores information about whether it contains a piece or is empty.
 
-Each chess piece has two main properties:
+Each chess piece has two basic properties:
 
-* Type — pawn, rook, knight, bishop, queen, or king
-* Color — white or black
+* `type` — pawn, rook, knight, bishop, queen, or king
+* `color` — white or black
 
-When a player clicks a piece, the game first checks whether that piece belongs to the current player. After that, the possible moves for the piece are calculated.
+### 2. Implemented Piece Movement
+
+After creating the board, I implemented movement rules for each piece separately.
 
 For example:
 
-* A rook can move horizontally and vertically.
-* A bishop can move diagonally.
-* A knight moves in an L shape.
-* A queen can move like a rook or bishop.
-* A king moves one square at a time.
-* A pawn moves forward and captures diagonally.
+* Rook → horizontal and vertical movement
+* Bishop → diagonal movement
+* Knight → L-shaped movement
+* Queen → rook + bishop movement
+* King → one square in any direction
+* Pawn → forward movement and diagonal capture
 
-After calculating the possible moves, the game also checks whether moving the piece would leave its own king in check. If that happens, the move is not allowed.
+### 3. Added Turn Management
 
-## Check and Checkmate
+I added a system to keep track of the current player.
 
-After each move, the game checks the position of the king.
+After a valid move, the turn changes from White to Black or Black to White.
 
-If the king is attacked, the game shows a check message and highlights the king's square.
+The game also checks whether the selected piece belongs to the current player.
 
-If the player is in check and has no legal move left, the game declares checkmate.
+### 4. Added Legal Move Validation
 
-The game also checks for stalemate when the player has no legal moves but the king is not in check.
+After calculating the possible moves of a piece, I added another validation step.
 
-## Special Chess Moves
+The game checks whether the selected move would leave the player's own king in check.
 
-The game supports some of the special rules of chess.
+If the king would be exposed to an attack, that move is removed from the legal moves.
 
-### Castling
+### 5. Implemented Check, Checkmate and Stalemate
 
-Castling is allowed only when the required conditions are satisfied. The king and rook must have the correct movement history, the squares between them must be empty, and the king cannot castle through check.
+After every move, the game checks the opponent's king.
 
-### En Passant
+If the king is attacked, the position is considered check.
 
-The game keeps track of the previous pawn move so that an en passant capture can only be made at the correct time.
+If the player is in check and has no legal moves, the game declares checkmate.
 
-### Pawn Promotion
+If the player has no legal moves but is not in check, the game declares stalemate.
 
-When a pawn reaches the opposite end of the board, a small selection appears. The player can promote the pawn to a:
+### 6. Implemented Special Moves
+
+After the basic movement system was working, I added special chess rules:
+
+* Castling
+* En passant
+* Pawn promotion
+
+These rules required additional game-state information, such as previous pawn movement and whether the king or rook had moved before.
+
+### 7. Added Game Features
+
+Finally, I added additional features such as:
+
+* Move history
+* Captured pieces
+* Chess notation
+* Undo
+* Timers
+* Different time controls
+* New Game
+* Invalid move messages
+* Legal move highlighting
+
+## Problems I Faced
+
+While developing the project, I faced several challenges.
+
+### 1. Managing Complex Game State
+
+The biggest challenge was managing all the information required for a chess game.
+
+The game needs to track:
+
+* Board position
+* Current player
+* Move history
+* Captured pieces
+* King position
+* Previous moves
+* Castling rights
+* En passant information
+* Promotion state
+* Timers
+* Game status
+
+Keeping all of this information synchronized in React was challenging.
+
+### 2. Preventing Illegal Moves
+
+It was not enough to calculate where a piece could normally move.
+
+I also had to check whether the move would expose my own king to check.
+
+For example, a piece may appear to be able to move to a square, but if moving that piece exposes the king, the move must be rejected.
+
+This required simulating moves and checking the resulting board position.
+
+### 3. Checkmate Detection
+
+Checkmate was another difficult part.
+
+The game needs to determine:
+
+1. Is the king currently in check?
+2. Does the player have any legal move?
+3. If no legal move exists while in check, it is checkmate.
+
+This requires checking the legal moves of all pieces, not just the king.
+
+### 4. Castling
+
+Castling required several conditions to be checked at the same time.
+
+I had to track whether:
+
+* The king had moved before.
+* The rook had moved before.
+* The squares between them were empty.
+* The king was not currently in check.
+* The king did not move through an attacked square.
+* The king did not finish on an attacked square.
+
+### 5. En Passant
+
+En passant was difficult because the captured pawn is not located on the destination square.
+
+I had to store information about the previous move and check whether the previous move was a two-square pawn move.
+
+### 6. Pawn Promotion
+
+When a pawn reaches the opposite side of the board, the game has to pause the normal move flow and ask the player which piece they want.
+
+I implemented a promotion selection for:
 
 * Queen
 * Rook
 * Bishop
 * Knight
 
+### 7. Chess Notation
 
-If a player's time reaches zero, the game ends by timeout.
+Generating chess notation was also challenging because the notation changes depending on the type of move.
 
-## Move History
+For example:
 
-The game keeps a list of moves made during the current game.
+* `e4`
+* `Nf3`
+* `O-O`
+* `Qxh4#`
 
-Some examples of the notation are:
+The game also needs to handle captures, check, checkmate, and situations where two pieces of the same type can reach the same square.
 
-```text
-e4
-Nf3
-O-O
-Qxh4#
-```
+### 8. Undo Functionality
 
-The notation also handles cases where two pieces of the same type can move to the same square.
+The Undo feature required more than simply moving the last piece back.
 
-## Undo
-
-The Undo button takes the game back to the previous position.
-
-It restores the important game information, including:
+I had to restore the complete previous game state, including:
 
 * Board position
 * Player turn
 * Move history
-* Timers
-* Special-move information
+* Captured pieces
+* Timer state
+* Castling information
+* En passant information
+* Promotion information
 
-## How to Play
+## What I Learned
 
-1. Select a time control.
-2. Click one of your pieces.
-3. The legal moves will be highlighted.
-4. Click a highlighted square to move.
-5. Continue taking turns with the other player.
-6. If a pawn reaches the final row, choose a promotion piece.
-7. Use **Undo Last Move** if you want to go back one move.
-8. Use **New Game** to start a new game.
+This project helped me understand how to break a complex problem into smaller parts.
 
-## Project Structure
+I learned how to:
 
-The main chess implementation is contained in:
+* Manage complex state using React
+* Implement game logic using JavaScript
+* Validate user actions
+* Work with arrays and objects
+* Simulate possible game states
+* Handle conditional logic
+* Implement timers
+* Maintain move history
+* Debug complex state-related problems
 
-```text
-ChessGame.jsx
-```
-
-This file contains the board, chess logic, React state, game controls, and UI for the game.
+The biggest learning from this project was that implementing chess is not only about moving pieces on a board. The difficult part is maintaining the complete game state and making sure every move follows the rules of chess.
 
 ## Limitations
 
-There are a few things that are not included in the current version:
+The current version still has some limitations:
 
 * Threefold repetition is not implemented.
 * The fifty-move rule is not implemented.
 * The board always has White at the bottom.
-* The game does not save its state after refreshing the browser.
-* The game works locally in the browser and does not use an online multiplayer server.
+* Game state is not saved after refreshing the browser.
+* There is no online multiplayer server.
+* The game currently works locally in the browser.
 
 ## Running the Project
 
-Install the required packages and run the React project using the normal npm command.
-
-For a Vite project:
+For a Vite React project:
 
 ```bash
 npm install
 npm run dev
 ```
 
-For a project using a `start` script:
-
-```bash
-npm start
-```
 The exact command depends on the scripts defined in `package.json`.
-
-# Run your app as usual (`npm start` / `npm run dev`).
