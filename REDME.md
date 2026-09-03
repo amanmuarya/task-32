@@ -14,7 +14,7 @@ Each chess piece has two basic properties:
 
 ## 2. Implemented Piece Movement
 After creating the board, I implemented movement rules for each piece separately.
-For example:
+
 
 * Bishop  → diagonal movement
 * Knight  → L-shaped movement
@@ -43,7 +43,7 @@ After the basic movement system was working, I added special chess rules:
 * Castling
 * En passant
 * Pawn promotion
-These rules required additional game-state information, such as previous pawn movement and whether the king or rook had moved before.
+These rules required additionalsuch as previous pawn movement and whether the king or rook had moved before.
 ## 7. Added Game Features
 Finally, I added additiona features such as:
 * Move history
